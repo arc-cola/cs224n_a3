@@ -195,5 +195,5 @@ cython_debug/
 
 
 # мое говно
-./results
-./losses_and_grad_norms
+results
+losses_and_grad_norms*
