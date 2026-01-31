@@ -113,8 +113,8 @@ def train(
     # Create dense batches of [batch_size, seq_len]
     model = Transformer(model_config).to(device)
 
-    # optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
-    optimizer = torch.optim.NAdam(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+    # optimizer = torch.optim.NAdam(model.parameters(), lr=learning_rate)
 
     num_chunks: int = dataset.shape[0]
 
@@ -237,9 +237,9 @@ if __name__ == "__main__":
             'bs': 16,
         },
         {
-            'name': 'lr_gc',
+            'name': 'lr_dm600',
             'config': ModelConfig(
-                d_model=33,
+                d_model=600,
                 n_heads=3,
                 n_layers=3,
                 context_length=512,
@@ -250,25 +250,183 @@ if __name__ == "__main__":
             'bs': 16,
         },
         {
-            'name': 'lr_gc_dm',
+            'name': 'lr_dm600_l10',
             'config': ModelConfig(
-                d_model=150,
+                d_model=600,
                 n_heads=3,
-                n_layers=3,
+                n_layers=10,
                 context_length=512,
                 vocab_size=50257,
             ),
             'lr': 1e-4,
-            'gc': 2,
+            'gc': 1,
             'bs': 16,
         },
+        {
+            'name': 'lr_dm600_l10_nh15',
+            'config': ModelConfig(
+                d_model=600,
+                n_heads=15,
+                n_layers=10,
+                context_length=512,
+                vocab_size=50257,
+            ),
+            'lr': 1e-4,
+            'gc': 1,
+            'bs': 16,
+        },
+        # {
+        #     'name': 'lr_dm',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=3,
+        #         n_layers=3,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr_dm_l1',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=3,
+        #         n_layers=1,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr_dm600_nl1',
+        #     'config': ModelConfig(
+        #         d_model=600,
+        #         n_heads=3,
+        #         n_layers=1,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr_dm_nh',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=10,
+        #         n_layers=3,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr_dm_nh_l1',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=10,
+        #         n_layers=1,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr_dm_nh_l10',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=10,
+        #         n_layers=10,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr_dm_nh15_l1_bs',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=15,
+        #         n_layers=1,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 32,
+        # },
+        # {
+        #     'name': 'lr_dm_l1_bs',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=3,
+        #         n_layers=1,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 32,
+        # },
+        # {
+        #     'name': 'lr_dm_l2_bs',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=3,
+        #         n_layers=2,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 32,
+        # },
+        # {
+        #     'name': 'lr_dm_bs',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=3,
+        #         n_layers=3,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 32,
+        # },
+        # {
+        #     'name': 'lr_nh1_dm_bs',
+        #     'config': ModelConfig(
+        #         d_model=150,
+        #         n_heads=3,
+        #         n_layers=3,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 32,
+        # },
     ]
     
     save_dir=f"./final/losses_and_grad_norms/"
     json_save_dir = f"./final/results/"
 
     for config in configs:
-        file_name = f"lr{config['lr']}_hd{config['config'].d_model}_nh{config['config'].n_heads}_nl{config['config'].n_layers}_bs{config['bs']}_gc{config['gc']}"
+        # file_name = f"lr{config['lr']}_hd{config['config'].d_model}_nh{config['config'].n_heads}_nl{config['config'].n_layers}_bs{config['bs']}_gc{config['gc']}"
+        file_name = config['name']
+        
         png_file_name = file_name + ".png"
         json_file_name = file_name + ".json"
         print(f"processing file {file_name}")

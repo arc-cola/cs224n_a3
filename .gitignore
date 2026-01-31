@@ -196,6 +196,7 @@ cython_debug/
 
 
 # мое говно
-results
+results*
 losses_and_grad_norms*
-final
+final*
+datasets*
