@@ -94,6 +94,7 @@ def train(
     max_steps: Optional[int] = None,
     decay=False,
     save_path=f"./losses_and_grad_norms.png",
+    save_weights_path: Optional[str] = None,
 ) -> None:
 
     if gradient_clipping is None:
@@ -163,6 +164,15 @@ def train(
 
     # Done with training, plot results in single plot
     plot_results(losses, grad_norms, save_path=save_path)
+
+    # Save model weights if path is provided
+    if save_weights_path:
+        os.makedirs(os.path.dirname(save_weights_path), exist_ok=True)
+        checkpoint = {
+            'model_state_dict': model.state_dict(),
+            'config': model_config,
+        }
+        torch.save(checkpoint, save_weights_path)
 
     return {"losses": losses, "grad_norms": grad_norms, "final_loss": losses[-1], "file_name": save_path}
 
@@ -317,13 +327,14 @@ if __name__ == "__main__":
             ),
             'lr': 1e-4,
             'gc': 1,
-            'bs': 16,
+            'bs': 12,
             'decay': True
         },
     ]
     
     save_dir=f"./final/losses_and_grad_norms/"
     json_save_dir = f"./final/results/"
+    weights_save_dir = f"./final/weights/"
 
     for config in configs:
         # file_name = f"lr{config['lr']}_hd{config['config'].d_model}_nh{config['config'].n_heads}_nl{config['config'].n_layers}_bs{config['bs']}_gc{config['gc']}"
@@ -338,6 +349,7 @@ if __name__ == "__main__":
 
         tiny_model_config = config['config']
 
+        weights_path = weights_save_dir + file_name + ".pt"
         results = train(
                 learning_rate=config['lr'],
                 gradient_clipping=config['gc'],
@@ -345,7 +357,8 @@ if __name__ == "__main__":
                 batch_size=config['bs'],
                 max_steps=100,
                 save_path=save_path,
-                decay=config.get('decay', False)
+                decay=config.get('decay', False),
+                save_weights_path=weights_path,
             )
         with open(json_save_dir + json_file_name, 'w') as results_file:
             json.dump(results, results_file)
