@@ -9,7 +9,7 @@ from model_solution import Transformer, ModelConfig
 
 def load_model(checkpoint_path: str, device: torch.device) -> Transformer:
     """Load model from checkpoint file."""
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
     config = checkpoint['config']
     model = Transformer(config)
     model.load_state_dict(checkpoint['model_state_dict'])
