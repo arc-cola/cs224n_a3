@@ -47,6 +47,8 @@ class CausalAttention(nn.Module):
         self.W_q = nn.Linear(config.d_model, self.d_attention * config.n_heads)
         self.W_v = nn.Linear(config.d_model, self.d_attention * config.n_heads)
 
+        self.dropout = nn.Dropout(p=0.3)
+
         self.W_o = nn.Linear(self.d_attention * config.n_heads, config.d_model)
 
         # Causal mask
@@ -79,6 +81,7 @@ class CausalAttention(nn.Module):
         qk.masked_fill_(self.causal_mask[:, :, :seq_len, :seq_len] == 0, float('-inf'))
         
         sm = softmax(qk / math.sqrt(self.d_attention), dim=-1)
+        sm = self.dropout(sm)
         
         h = sm @ v
         

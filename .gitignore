@@ -200,3 +200,6 @@ results*
 losses_and_grad_norms*
 final*
 datasets*
+models*
+inference.py
+submission.zip

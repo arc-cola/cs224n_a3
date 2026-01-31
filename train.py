@@ -4,6 +4,7 @@ warnings.filterwarnings("ignore")
 import os
 import json
 import gc
+from dataclasses import asdict
 
 from datasets import load_dataset
 from tqdm import tqdm
@@ -163,6 +164,9 @@ def train(
 
     # Done with training, plot results in single plot
     plot_results(losses, grad_norms, save_path=save_path)
+    torch.save(model.state_dict(), './models/' + save_path.split('/')[-1][:-4])
+    with open('./models/' + save_path.split('/')[-1][:-4] + '.json', 'w') as config_file:
+        json.dump(asdict(model_config), config_file)
 
     return {"losses": losses, "grad_norms": grad_norms, "final_loss": losses[-1], "file_name": save_path}
 
@@ -178,134 +182,72 @@ if __name__ == "__main__":
     save_dir=f"./losses_and_grad_norms/"
     json_save_dir = f"./results/"
 
-    # for hidden_dim in hidden_dims:
-    #     for n_heads in ns_heads:
-    #         for n_layers in ns_layers:
-    #             for batch_size in batch_sizes:
-    #                 for gradient_clipping in gradient_clippings:
-                        # file_name = f"hd{hidden_dim}_nh{n_heads}_nl{n_layers}_bs{batch_size}_gc{gradient_clipping}"
-                        # png_file_name = file_name + ".png"
-                        # json_file_name = file_name + ".json"
-                        # print(f"processing file {file_name}")
-                        # if png_file_name in os.listdir(save_dir) and json_file_name in os.listdir(json_save_dir):
-                        #     continue
-                        # save_path = save_dir + png_file_name
-
-                        # tiny_model_config = ModelConfig(
-                        #     d_model=hidden_dim,
-                        #     n_heads=n_heads,
-                        #     n_layers=n_layers,
-                        #     context_length=512,
-                        #     vocab_size=50257,
-                        # )
-
-                        # results = train(
-                        #         learning_rate=1e-4,
-                        #         gradient_clipping=gradient_clipping,
-                        #         model_config = tiny_model_config,
-                        #         batch_size=batch_size,
-                        #         max_steps=100,
-                        #         save_path=save_path
-                        #     )
-                        # with open(json_save_dir + json_file_name, 'w') as results_file:
-                        #     json.dump(results, results_file)
-
-                        # gc.collect()
-                        # torch.cuda.empty_cache()
-
     configs = [
-        {
-            'name': 'base_config',
-            'config': ModelConfig(
-                d_model=33,
-                n_heads=3,
-                n_layers=3,
-                context_length=512,
-                vocab_size=50257,
-            ),
-            'lr': 1e-5,
-            'gc': 1,
-            'bs': 16,
-        },
-        {
-            'name': 'lr',
-            'config': ModelConfig(
-                d_model=33,
-                n_heads=3,
-                n_layers=3,
-                context_length=512,
-                vocab_size=50257,
-            ),
-            'lr': 1e-4,
-            'gc': 1,
-            'bs': 16,
-        },
-        {
-            'name': 'lr_dm600',
-            'config': ModelConfig(
-                d_model=600,
-                n_heads=3,
-                n_layers=3,
-                context_length=512,
-                vocab_size=50257,
-            ),
-            'lr': 1e-4,
-            'gc': 1,
-            'bs': 16,
-        },
-        {
-            'name': 'lr_dm600_l10',
-            'config': ModelConfig(
-                d_model=600,
-                n_heads=3,
-                n_layers=10,
-                context_length=512,
-                vocab_size=50257,
-            ),
-            'lr': 1e-4,
-            'gc': 1,
-            'bs': 16,
-        },
-        {
-            'name': 'lr_dm600_h10',
-            'config': ModelConfig(
-                d_model=600,
-                n_heads=10,
-                n_layers=3,
-                context_length=512,
-                vocab_size=50257,
-            ),
-            'lr': 1e-4,
-            'gc': 1,
-            'bs': 16,
-        },
-        {
-            'name': 'lr_dm600_l10_h10',
-            'config': ModelConfig(
-                d_model=600,
-                n_heads=10,
-                n_layers=10,
-                context_length=512,
-                vocab_size=50257,
-            ),
-            'lr': 1e-4,
-            'gc': 1,
-            'bs': 16,
-        },
-        {
-            'name': 'lr_dm600_decay_NAdam',
-            'config': ModelConfig(
-                d_model=600,
-                n_heads=3,
-                n_layers=3,
-                context_length=512,
-                vocab_size=50257,
-            ),
-            'lr': 1e-4,
-            'gc': 1,
-            'bs': 16,
-            'decay': True
-        },
+        # {
+        #     'name': 'base_config',
+        #     'config': ModelConfig(
+        #         d_model=33,
+        #         n_heads=3,
+        #         n_layers=3,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-5,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr',
+        #     'config': ModelConfig(
+        #         d_model=33,
+        #         n_heads=3,
+        #         n_layers=3,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr_dm600',
+        #     'config': ModelConfig(
+        #         d_model=600,
+        #         n_heads=3,
+        #         n_layers=3,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr_dm600_h10',
+        #     'config': ModelConfig(
+        #         d_model=600,
+        #         n_heads=10,
+        #         n_layers=3,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
+        # {
+        #     'name': 'lr_dm600_h6_l6',
+        #     'config': ModelConfig(
+        #         d_model=600,
+        #         n_heads=6,
+        #         n_layers=6,
+        #         context_length=512,
+        #         vocab_size=50257,
+        #     ),
+        #     'lr': 1e-4,
+        #     'gc': 1,
+        #     'bs': 16,
+        # },
         {
             'name': 'GPT-2',
             'config': ModelConfig(
@@ -317,8 +259,7 @@ if __name__ == "__main__":
             ),
             'lr': 1e-4,
             'gc': 1,
-            'bs': 16,
-            'decay': True
+            'bs': 12,
         },
     ]
     
@@ -326,7 +267,6 @@ if __name__ == "__main__":
     json_save_dir = f"./final/results/"
 
     for config in configs:
-        # file_name = f"lr{config['lr']}_hd{config['config'].d_model}_nh{config['config'].n_heads}_nl{config['config'].n_layers}_bs{config['bs']}_gc{config['gc']}"
         file_name = config['name']
         
         png_file_name = file_name + ".png"
@@ -343,7 +283,7 @@ if __name__ == "__main__":
                 gradient_clipping=config['gc'],
                 model_config = tiny_model_config,
                 batch_size=config['bs'],
-                max_steps=100,
+                # max_steps=100,
                 save_path=save_path,
                 decay=config.get('decay', False)
             )
