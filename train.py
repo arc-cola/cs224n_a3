@@ -174,39 +174,122 @@ if __name__ == "__main__":
     save_dir=f"./losses_and_grad_norms/"
     json_save_dir = f"./results/"
 
-    for hidden_dim in hidden_dims:
-        for n_heads in ns_heads:
-            for n_layers in ns_layers:
-                for batch_size in batch_sizes:
-                    for gradient_clipping in gradient_clippings:
-                        file_name = f"hd{hidden_dim}_nh{n_heads}_nl{n_layers}_bs{batch_size}_gc{gradient_clipping}"
-                        png_file_name = file_name + ".png"
-                        json_file_name = file_name + ".json"
-                        print(f"processing file {file_name}")
-                        if png_file_name in os.listdir(save_dir) and json_file_name in os.listdir(json_save_dir):
-                            continue
-                        save_path = save_dir + png_file_name
+    # for hidden_dim in hidden_dims:
+    #     for n_heads in ns_heads:
+    #         for n_layers in ns_layers:
+    #             for batch_size in batch_sizes:
+    #                 for gradient_clipping in gradient_clippings:
+                        # file_name = f"hd{hidden_dim}_nh{n_heads}_nl{n_layers}_bs{batch_size}_gc{gradient_clipping}"
+                        # png_file_name = file_name + ".png"
+                        # json_file_name = file_name + ".json"
+                        # print(f"processing file {file_name}")
+                        # if png_file_name in os.listdir(save_dir) and json_file_name in os.listdir(json_save_dir):
+                        #     continue
+                        # save_path = save_dir + png_file_name
 
-                        tiny_model_config = ModelConfig(
-                            d_model=hidden_dim,
-                            n_heads=n_heads,
-                            n_layers=n_layers,
-                            context_length=512,
-                            vocab_size=50257,
-                        )
+                        # tiny_model_config = ModelConfig(
+                        #     d_model=hidden_dim,
+                        #     n_heads=n_heads,
+                        #     n_layers=n_layers,
+                        #     context_length=512,
+                        #     vocab_size=50257,
+                        # )
 
-                        results = train(
-                                learning_rate=1e-4,
-                                gradient_clipping=gradient_clipping,
-                                model_config = tiny_model_config,
-                                batch_size=batch_size,
-                                max_steps=100,
-                                save_path=save_path
-                            )
-                        with open(json_save_dir + json_file_name, 'w') as results_file:
-                            json.dump(results, results_file)
+                        # results = train(
+                        #         learning_rate=1e-4,
+                        #         gradient_clipping=gradient_clipping,
+                        #         model_config = tiny_model_config,
+                        #         batch_size=batch_size,
+                        #         max_steps=100,
+                        #         save_path=save_path
+                        #     )
+                        # with open(json_save_dir + json_file_name, 'w') as results_file:
+                        #     json.dump(results, results_file)
 
-                        gc.collect()
-                        torch.cuda.empty_cache()
+                        # gc.collect()
+                        # torch.cuda.empty_cache()
+
+    configs = [
+        {
+            'name': 'base_config',
+            'config': ModelConfig(
+                d_model=33,
+                n_heads=3,
+                n_layers=3,
+                context_length=512,
+                vocab_size=50257,
+            ),
+            'lr': 1e-5,
+            'gc': 1,
+            'bs': 16,
+        },
+        {
+            'name': 'lr',
+            'config': ModelConfig(
+                d_model=33,
+                n_heads=3,
+                n_layers=3,
+                context_length=512,
+                vocab_size=50257,
+            ),
+            'lr': 1e-4,
+            'gc': 1,
+            'bs': 16,
+        },
+        {
+            'name': 'lr_gc',
+            'config': ModelConfig(
+                d_model=33,
+                n_heads=3,
+                n_layers=3,
+                context_length=512,
+                vocab_size=50257,
+            ),
+            'lr': 1e-4,
+            'gc': 1,
+            'bs': 16,
+        },
+        {
+            'name': 'lr_gc_dm',
+            'config': ModelConfig(
+                d_model=150,
+                n_heads=3,
+                n_layers=3,
+                context_length=512,
+                vocab_size=50257,
+            ),
+            'lr': 1e-4,
+            'gc': 2,
+            'bs': 16,
+        },
+    ]
+    
+    save_dir=f"./final/losses_and_grad_norms/"
+    json_save_dir = f"./final/results/"
+
+    for config in configs:
+        file_name = f"lr{config['lr']}_hd{config['config'].d_model}_nh{config['config'].n_heads}_nl{config['config'].n_layers}_bs{config['bs']}_gc{config['gc']}"
+        png_file_name = file_name + ".png"
+        json_file_name = file_name + ".json"
+        print(f"processing file {file_name}")
+        if png_file_name in os.listdir(save_dir) and json_file_name in os.listdir(json_save_dir):
+            continue
+        save_path = save_dir + png_file_name
+
+        tiny_model_config = config['config']
+
+        results = train(
+                learning_rate=config['lr'],
+                gradient_clipping=config['gc'],
+                model_config = tiny_model_config,
+                batch_size=config['bs'],
+                max_steps=100,
+                save_path=save_path
+            )
+        with open(json_save_dir + json_file_name, 'w') as results_file:
+            json.dump(results, results_file)
+
+        gc.collect()
+        torch.cuda.empty_cache()
     
 
