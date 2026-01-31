@@ -92,7 +92,8 @@ def train(
     model_config: ModelConfig,
     batch_size: int,
     max_steps: Optional[int] = None,
-    save_path=f"./losses_and_grad_norms.png"
+    decay=False,
+    save_path=f"./losses_and_grad_norms.png",
 ) -> None:
 
     if gradient_clipping is None:
@@ -115,6 +116,7 @@ def train(
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
     # optimizer = torch.optim.NAdam(model.parameters(), lr=learning_rate)
+    exp_lr = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma = 0.9)
 
     num_chunks: int = dataset.shape[0]
 
@@ -134,6 +136,8 @@ def train(
 
         if num_steps_completed % 10 == 0 and num_steps_completed > 0:
             plot_results(losses, grad_norms, save_path=save_path)
+        if num_steps_completed > 80 and decay:
+            exp_lr.step()
 
         batch: Int[Tensor, "batch_size chunk_size"] = dataset[i:i+batch_size].to(device)
 
@@ -263,10 +267,23 @@ if __name__ == "__main__":
             'bs': 16,
         },
         {
-            'name': 'lr_dm600_l10_nh15',
+            'name': 'lr_dm600_h10',
             'config': ModelConfig(
                 d_model=600,
-                n_heads=15,
+                n_heads=10,
+                n_layers=3,
+                context_length=512,
+                vocab_size=50257,
+            ),
+            'lr': 1e-4,
+            'gc': 1,
+            'bs': 16,
+        },
+        {
+            'name': 'lr_dm600_l10_h10',
+            'config': ModelConfig(
+                d_model=600,
+                n_heads=10,
                 n_layers=10,
                 context_length=512,
                 vocab_size=50257,
@@ -275,149 +292,34 @@ if __name__ == "__main__":
             'gc': 1,
             'bs': 16,
         },
-        # {
-        #     'name': 'lr_dm',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=3,
-        #         n_layers=3,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 16,
-        # },
-        # {
-        #     'name': 'lr_dm_l1',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=3,
-        #         n_layers=1,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 16,
-        # },
-        # {
-        #     'name': 'lr_dm600_nl1',
-        #     'config': ModelConfig(
-        #         d_model=600,
-        #         n_heads=3,
-        #         n_layers=1,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 16,
-        # },
-        # {
-        #     'name': 'lr_dm_nh',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=10,
-        #         n_layers=3,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 16,
-        # },
-        # {
-        #     'name': 'lr_dm_nh_l1',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=10,
-        #         n_layers=1,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 16,
-        # },
-        # {
-        #     'name': 'lr_dm_nh_l10',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=10,
-        #         n_layers=10,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 16,
-        # },
-        # {
-        #     'name': 'lr_dm_nh15_l1_bs',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=15,
-        #         n_layers=1,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 32,
-        # },
-        # {
-        #     'name': 'lr_dm_l1_bs',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=3,
-        #         n_layers=1,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 32,
-        # },
-        # {
-        #     'name': 'lr_dm_l2_bs',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=3,
-        #         n_layers=2,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 32,
-        # },
-        # {
-        #     'name': 'lr_dm_bs',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=3,
-        #         n_layers=3,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 32,
-        # },
-        # {
-        #     'name': 'lr_nh1_dm_bs',
-        #     'config': ModelConfig(
-        #         d_model=150,
-        #         n_heads=3,
-        #         n_layers=3,
-        #         context_length=512,
-        #         vocab_size=50257,
-        #     ),
-        #     'lr': 1e-4,
-        #     'gc': 1,
-        #     'bs': 32,
-        # },
+        {
+            'name': 'lr_dm600_decay_NAdam',
+            'config': ModelConfig(
+                d_model=600,
+                n_heads=3,
+                n_layers=3,
+                context_length=512,
+                vocab_size=50257,
+            ),
+            'lr': 1e-4,
+            'gc': 1,
+            'bs': 16,
+            'decay': True
+        },
+        {
+            'name': 'GPT-2',
+            'config': ModelConfig(
+                d_model=768,
+                n_heads=12,
+                n_layers=12,
+                context_length=1024,
+                vocab_size=50257,
+            ),
+            'lr': 1e-4,
+            'gc': 1,
+            'bs': 16,
+            'decay': True
+        },
     ]
     
     save_dir=f"./final/losses_and_grad_norms/"
@@ -442,7 +344,8 @@ if __name__ == "__main__":
                 model_config = tiny_model_config,
                 batch_size=config['bs'],
                 max_steps=100,
-                save_path=save_path
+                save_path=save_path,
+                decay=config.get('decay', False)
             )
         with open(json_save_dir + json_file_name, 'w') as results_file:
             json.dump(results, results_file)
